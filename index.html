@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classy – Órarend, Apple Watch & AI Tanulótárs</title>
+  <meta name="description" content="A modern diákok túlélőeszköze: villámgyors órarend, Dynamic Island visszaszámláló, Apple Watch szinkron és AI tanulókvízek." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #090a0f;
+      --bg-card: rgba(22, 24, 36, 0.75);
+      --bg-card-hover: rgba(30, 33, 50, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-highlight: rgba(129, 140, 248, 0.35);
+      --accent-indigo: #818cf8;
+      --accent-indigo-glow: rgba(129, 140, 248, 0.2);
+      --accent-orange: #D16428;
+      --accent-green: #34d399;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      background-image: 
+        radial-gradient(circle at 20% 15%, rgba(67, 56, 202, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 80% 25%, rgba(209, 100, 40, 0.14) 0%, transparent 45%);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* NAVBAR */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(9, 10, 15, 0.8);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      cursor: pointer;
+    }
+
+    .brand svg {
+      width: 40px;
+      height: 40px;
+      transition: transform 0.25s ease;
+    }
+
+    .brand:hover svg {
+      transform: rotate(10deg) scale(1.08);
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .nav-btn:hover {
+      color: var(--text-main);
+    }
+
+    .nav-btn.active {
+      background: var(--accent-indigo);
+      color: #090a0f;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(129, 140, 248, 0.4);
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+      flex: 1;
+    }
+
+    .page-section {
+      display: none;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* HERO SECTION */
+    .hero {
+      text-align: center;
+      padding: 36px 0 56px;
+    }
+
+    .prof-hero-wrapper {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 24px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .prof-tooltip {
+      font-size: 12px;
+      color: var(--accent-orange);
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: inline-block;
+      background: rgba(209, 100, 40, 0.12);
+      border: 1px solid rgba(209, 100, 40, 0.3);
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 54px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #C7D2FE 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 32px;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 14px 28px;
+      border-radius: 14px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 16px;
+      padding: 14px 24px;
+      border-radius: 14px;
+      text-decoration: none;
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* FEATURE GRID */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 28px;
+      backdrop-filter: blur(12px);
+      transition: border-color 0.25s ease, transform 0.25s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-highlight);
+      transform: translateY(-3px);
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--accent-indigo-glow);
+      color: var(--accent-indigo);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      font-size: 19px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 14.5px;
+    }
+
+    /* CONTENT PAGES (SUPPORT & PRIVACY) */
+    .doc-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 28px;
+    }
+
+    .doc-box h1 {
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      letter-spacing: -0.8px;
+    }
+
+    .doc-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .doc-box h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #e2e8f0;
+      margin: 28px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .doc-box p, .doc-box li {
+      color: #cbd5e1;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .doc-box ul {
+      padding-left: 22px;
+      margin-bottom: 16px;
+    }
+
+    .highlight-banner {
+      background: rgba(129, 140, 248, 0.1);
+      border-left: 4px solid var(--accent-indigo);
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      font-size: 14.5px;
+      color: #e0e7ff;
+    }
+
+    /* FAQ ITEMS */
+    .faq-item {
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 18px 0;
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-q {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .faq-a {
+      color: var(--text-muted);
+      font-size: 14.5px;
+    }
+
+    /* CONTACT CARD */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13.5px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-main);
+      text-decoration: underline;
+    }
+
+    /* PROF SVG ANIMATION IN HERO */
+    .head-motion { transform-origin: 250px 250px; animation: look-head 10s ease-in-out infinite; }
+    .eye-motion { animation: look-eyes 10s ease-in-out infinite; }
+    .blink-left { transform-origin: 180px 195px; animation: blink 5s linear infinite; }
+    .blink-right { transform-origin: 320px 195px; animation: blink 5s linear infinite; }
+    @keyframes look-head {
+      0%, 16%, 43%, 56%, 88%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+      22%, 36% { transform: translate(5px, -2px) rotate(-7deg); }
+      64%, 79% { transform: translate(-5px, 1px) rotate(6deg); }
+    }
+    @keyframes look-eyes {
+      0%, 13%, 43%, 54%, 88%, 100% { transform: translate(0px, 0px); }
+      18%, 36% { transform: translate(12px, -2px); }
+      59%, 79% { transform: translate(-12px, 1px); }
+    }
+    @keyframes blink {
+      0%, 26%, 29%, 68%, 71%, 100% { transform: scaleY(1); }
+      27.5%, 69.5% { transform: scaleY(0.08); }
+    }
+    .boop-active {
+      animation: boopPop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) !important;
+    }
+    @keyframes boopPop {
+      0% { transform: scale(1); }
+      30% { transform: scale(0.82, 0.9) rotate(-8deg); }
+      65% { transform: scale(1.12, 0.95) rotate(6deg); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 640px) {
+      .doc-box { padding: 24px; }
+      .nav-container { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <header>
+    <div class="nav-container">
+      <a class="brand" onclick="showPage('home')">
+        <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="265" cy="266" r="215" fill="#27140B" />
+          <g transform="rotate(13 250 250)">
+            <circle cx="250" cy="250" r="215" fill="#27140B" />
+            <circle cx="250" cy="250" r="195" fill="#D16428" />
+            <circle cx="250" cy="250" r="162" fill="#27140B" />
+            <circle cx="250" cy="250" r="150" fill="#FAF1D9" />
+            <circle cx="180" cy="195" r="42" stroke="#27140B" stroke-width="14" fill="none" />
+            <circle cx="320" cy="195" r="42" stroke="#27140B" stroke-width="14" fill="none" />
+            <path d="M 222 195 Q 250 188 278 195" stroke="#27140B" stroke-width="12" stroke-linecap="round" fill="none" />
+            <circle cx="180" cy="195" r="11" fill="#27140B" />
+            <circle cx="320" cy="195" r="11" fill="#27140B" />
+            <path d="M 250 195 L 250 285 L 210 285" stroke="#D16428" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            <path d="M 185 322 Q 250 385 315 322" stroke="#D16428" stroke-width="16" stroke-linecap="round" fill="none" />
+          </g>
+        </svg>
+        <span>Classy</span>
+      </a>
+
+      <nav>
+        <button id="btn-home" class="nav-btn active" onclick="showPage('home')">Főoldal</button>
+        <button id="btn-support" class="nav-btn" onclick="showPage('support')">Támogatás (Support)</button>
+        <button id="btn-privacy" class="nav-btn" onclick="showPage('privacy')">Adatvédelem (Privacy)</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ==================== 1. FŐOLDAL (HOME) ==================== -->
+    <section id="page-home" class="page-section active">
+      <div class="hero">
+        <div class="prof-hero-wrapper" onclick="boopProf()" title="Bökd meg az orrom!">
+          <svg id="hero-prof-svg" viewBox="0 0 500 500" width="150" height="150" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="265" cy="266" r="215" fill="#27140B" />
+            <g class="head-motion">
+              <g transform="rotate(13 250 250)">
+                <circle cx="250" cy="250" r="215" fill="#27140B" />
+                <circle cx="250" cy="250" r="195" fill="#D16428" />
+                <circle cx="250" cy="250" r="162" fill="#27140B" />
+                <circle cx="250" cy="250" r="150" fill="#FAF1D9" />
+                <circle cx="180" cy="195" r="42" stroke="#27140B" stroke-width="12" fill="none" />
+                <circle cx="320" cy="195" r="42" stroke="#27140B" stroke-width="12" fill="none" />
+                <path d="M 222 195 Q 250 188 278 195" stroke="#27140B" stroke-width="11" stroke-linecap="round" fill="none" />
+                <g class="eye-motion">
+                  <g class="blink-left"><circle cx="180" cy="195" r="10" fill="#27140B" /></g>
+                  <g class="blink-right"><circle cx="320" cy="195" r="10" fill="#27140B" /></g>
+                </g>
+                <path d="M 250 195 L 250 285 L 210 285" stroke="#D16428" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                <path d="M 185 322 Q 250 385 315 322" stroke="#D16428" stroke-width="14" stroke-linecap="round" fill="none" />
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="prof-tooltip">👋 Koppints The Prof orrára!</div>
+        <h1>A telefonod a szekrényben.<br>Az órarended a csuklódon.</h1>
+        <p>A Classy a modern diákok tökéletes túlélőeszköze: villámgyors órarend, Dynamic Island visszaszámláló, 100% offline Apple Watch alkalmazás és AI-alapú tanulókvízek.</p>
+        <div class="cta-group">
+          <a href="#support" onclick="showPage('support'); return false;" class="btn-primary">Támogatás & Segítség</a>
+          <a href="#privacy" onclick="showPage('privacy'); return false;" class="btn-secondary">Adatvédelmi Tájékoztató</a>
+        </div>
+      </div>
+
+      <div class="features-grid">
+        <div class="card">
+          <div class="card-icon">⌚</div>
+          <h3>Apple Watch & Offline Mód</h3>
+          <p>Ha a telefonod a táskádban vagy a szekrényben pihen, a Classy önállóan is mutatja a napi menetrendet, a teremszámokat és a rövidített vázlataidat a csuklódon.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🏝️</div>
+          <h3>Dynamic Island & Widgetek</h3>
+          <p>Meg se kell nyitnod az appot! A főképernyőn és az Élő Tevékenységek (Live Activities) sávban másodpercre pontosan látod, mennyi idő van még a csengetésig.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">✨</div>
+          <h3>AI Órarend Szkennelés</h3>
+          <p>Nincs kedved kézzel pötyögni? Fotózd le a nyomtatott órarendedet vagy egy képernyőképet, és a Classy AI 3 másodperc alatt felépíti a teljes hetedet.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📝</div>
+          <h3>AI Gyorsvázlatok („The Prof”)</h3>
+          <p>Fotózd le a füzetedet dolgozat előtt! A beépített AI asszisztens kigyűjti a legfontosabb képleteket, évszámokat és definíciókat egyetlen tömör jegyzetbe.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧠</div>
+          <h3>Tinder-stílusú AI Kvízek</h3>
+          <p>Gyakorolj játékosan! Generálj Igaz/Hamis kártyahúzós, feleletválasztós vagy villámkérdéses kvízeket bármilyen tantárgyból 4 nehézségi szinten.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">👁️</div>
+          <h3>Valódi OLED Lopakodó Mód</h3>
+          <p>Egyetlen érintéssel 100%-ban monokróm, mélyfekete felületre válthatsz, amely kíméli a szemedet és minimálisra csökkenti az akkumulátor fogyasztását.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. TÁMOGATÁS (SUPPORT) ==================== -->
+    <section id="page-support" class="page-section">
+      <div class="doc-box">
+        <h1>Támogatás & Segítségnyújtás (Support)</h1>
+        <div class="doc-meta">Classy – iOS & watchOS Alkalmazás Támogatási Központ</div>
+
+        <p>Kérdésed van a Classy használatával kapcsolatban, hibát tapasztaltál, vagy javaslatod van egy új funkcióra? Az alábbi elérhetőségeken és gyakori kérdések között mindenre megtalálod a választ.</p>
+
+        <div class="contact-grid">
+          <div class="card">
+            <div class="card-icon">✉️</div>
+            <h3>Kapcsolatfelvétel E-mailben</h3>
+            <p>Írj nekünk közvetlenül, és 24–48 órán belül válaszolunk minden technikai vagy számlázási kérdésre:</p>
+            <p style="margin-top:12px; font-weight:700; color:var(--accent-indigo);">
+              <!-- IDE ÍRD BE A SAJÁT SUPPORT EMAIL CÍMEDET -->
+              <a href="mailto:fancsalitamas34@gmail.com" style="color:var(--accent-indigo); text-decoration:none;">fancsalitamas34@gmail.com</a>
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🛠️</div>
+            <h3>Fejlesztői Információk</h3>
+            <p><strong>Fejlesztő:</strong> Fancsali Tamás<br>
+               <strong>Platformok:</strong> iOS 17.0+ / watchOS 10.0+<br>
+               <strong>Verzió:</strong> 1.0</p>
+          </div>
+        </div>
+
+        <h2>Gyakran Ismételt Kérdések (GYIK / FAQ)</h2>
+
+        <div class="faq-item">
+          <div class="faq-q">1. Hogyan szinkronizálhatom az órarendemet az Apple Watch-omra?</div>
+          <div class="faq-a">Amikor az iPhone alkalmazásban módosítod az órarendedet vagy új jegyzetet hozol létre, az adatok a háttérben automatikusan átküldésre kerülnek az Apple Watch-ra, amint a két eszköz Bluetooth vagy Wi-Fi hatótávolságon belül van.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">2. Működik az Apple Watch alkalmazás, ha a telefonom nincs nálam (pl. le van adva)?</div>
+          <div class="faq-a">Igen! A Classy minden szinkronizált órarendet és jegyzetet helyben (offline) is eltárol az órádon, így teljesen függetlenül, internet- és telefonkapcsolat nélkül is látod a napi beosztásodat és a vázlataidat.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">3. Hogyan működik az AI Órarend Szkennelés és a Puskaszerkesztő?</div>
+          <div class="faq-a">Nyisd meg az „Órarend” fülön az „AI Szkennelés” gombot (vagy a „Jegyzetek” fülön az „AI Puska” gombot), és készíts egy jól olvasható fotót a papírról vagy a füzetedről. Az AI néhány másodperc alatt feldolgozza a képet, és strukturált formában elmenti az eszközödre.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">4. Hogyan kapcsolhatom be a Dynamic Island visszaszámlálót?</div>
+          <div class="faq-a">Győződj meg róla, hogy az iPhone Beállítások -> Classy menüpont alatt engedélyezve van az „Élő tevékenységek” (Live Activities) opció. Ezután a tanítási nap során a visszaszámláló automatikusan megjelenik a Dynamic Islanden és a Zárolási képernyőn.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q">5. Hogyan tudom törölni az adataimat?</div>
+          <div class="faq-a">Mivel a Classy minden órarendet és jegyzetet helyben, a saját készülékeden tárol, az alkalmazás Beállítások menüpontjában bármikor törölheted az adatokat, vagy az alkalmazás eltávolításával minden helyi adat véglegesen törlődik.</div>
+        </div>
+
+        <div class="highlight-banner">
+          <strong>🇬🇧 English Support Summary (For Apple App Review):</strong><br>
+          Need help with Classy? For technical support, bug reports, or inquiries regarding the iOS and Apple Watch applications, please contact the developer (Tamás Fancsali) directly at <strong>fancsalitamas34@gmail.com</strong>. We respond to all support requests within 24–48 hours.
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3. ADATVÉDELEM (PRIVACY POLICY) ==================== -->
+    <section id="page-privacy" class="page-section">
+      <div class="doc-box">
+        <h1>Adatvédelmi Tájékoztató (Privacy Policy)</h1>
+        <div class="doc-meta">Hatálybalépés és utolsó frissítés dátuma: 2026. október 14.</div>
+
+        <div class="highlight-banner">
+          <strong>🇬🇧 English Executive Summary (For Apple App Review & International Users):</strong><br>
+          <strong>Classy</strong> respects your privacy. All personal schedules, subjects, classroom numbers, and study notes are stored locally on your device (iPhone and Apple Watch) using Apple's native storage frameworks. We do not require account registration, and we do not track users or sell personal data. When you voluntarily use the AI Schedule Scanner, AI Study Note Summarizer, or AI Quiz Generator, the selected image or text prompt is securely transmitted via encrypted HTTPS to our AI processing provider solely for immediate optical character recognition (OCR) and text generation. Images and prompts are processed ephemerally and are never permanently stored by the developer.
+        </div>
+
+        <h2>1. Bevezetés és az Adatkezelő adatai</h2>
+        <p>Jelen Adatvédelmi Tájékoztató célja, hogy átlátható és érthető módon ismertesse, hogyan kezeli a <strong>Classy</strong> mobil- és okosóra-alkalmazás (a továbbiakban: „Alkalmazás”) a felhasználók adatait.</p>
+        <ul>
+          <li><strong>Adatkezelő / Fejlesztő neve:</strong> Fancsali Tamás</li>
+          <li><strong>Kapcsolattartási e-mail cím:</strong> fancsalitamas34@gmail.com</li>
+        </ul>
+
+        <h2>2. Milyen adatokat gyűjt és kezel az Alkalmazás?</h2>
+        <p>A Classy tervezésének alapelve az adatminimalizálás („Privacy by Design”). Az Alkalmazás használatához <strong>nem szükséges felhasználói fiókot létrehozni</strong>, és nem kérünk be személyes azonosító adatokat (nevet, lakcímet, telefonszámot).</p>
+
+        <p><strong>2.1. Helyben, az eszközön tárolt adatok (Local Storage)</strong></p>
+        <ul>
+          <li>Az általad megadott órarendek, tantárgynevek, tanárok nevei, teremszámok, valamint az elkészített jegyzetek és kvízek kizárólag a saját iPhone és Apple Watch készülékeden (helyi adatbázisban / SwiftData-ban) tárolódnak.</li>
+          <li>Ezekhez a helyben tárolt adatokhoz a Fejlesztő nem fér hozzá, és azok nem kerülnek feltöltésre központi szerverre.</li>
+        </ul>
+
+        <p><strong>2.2. Kamera, Fotótár és Mesterséges Intelligencia (AI) funkciók</strong></p>
+        <ul>
+          <li>Az Alkalmazás csak abban az esetben kér hozzáférést a készülék Kamerájához vagy Fotótárához, ha te kifejezetten elindítod az <strong>„AI Órarend Szkennelés”</strong>, az <strong>„AI Puskaszerkesztő / Jegyzetszkennelés”</strong> vagy az <strong>„AI Tanulókvíz”</strong> funkciót.</li>
+          <li>A kiválasztott vagy lefotózott képet, illetve a megadott témakört az Alkalmazás titkosított csatornán (HTTPS) továbbítja a szövegfelismerést és szövegösszegzést végző mesterséges intelligencia API szolgáltatónak (Google Gemini API / Groq API) kizárólag az adott kérés teljesítése (szöveg kinyerése, vázlat vagy kvíz generálása) céljából.</li>
+          <li>A beküldött képeket a Fejlesztő nem menti el, nem tárolja saját szerveren, és nem kapcsolja össze a személyazonosságoddal.</li>
+        </ul>
+
+        <h2>3. Eszközengedélyek</h2>
+        <ul>
+          <li><strong>Kamera és Fotók (Opcionális):</strong> Kizárólag az órarendek és füzetjegyzetek beolvasásához használatos, amikor a felhasználó kezdeményezi a szkennelést.</li>
+          <li><strong>Értesítések és Élő Tevékenységek / Live Activities (Opcionális):</strong> A tanórák és szünetek kezdetét/végét jelző helyi értesítések, valamint a Dynamic Island visszaszámláló megjelenítéséhez szükségesek.</li>
+          <li><strong>Apple Watch Szinkronizáció (WatchConnectivity):</strong> Az iPhone és a párosított Apple Watch közötti közvetlen, helyi adatátvitelt biztosítja.</li>
+        </ul>
+
+        <h2>4. Harmadik fél szolgáltatók és Alkalmazáson belüli vásárlások</h2>
+        <ul>
+          <li><strong>Apple App Store / StoreKit:</strong> Az esetleges alkalmazáson belüli vásárlásokat (In-App Purchases) teljes egészében az Apple Inc. dolgozza fel. A Fejlesztő nem látja és nem kezeli a bankkártya- vagy fizetési adataidat.</li>
+          <li><strong>AI Feldolgozó Partnerek:</strong> Az AI funkciók igénybevételekor a kérések teljesítéséhez a Google LLC (Gemini API) és/vagy a Groq Inc. biztonságos API végpontjait vesszük igénybe.</li>
+        </ul>
+
+        <h2>5. Adatmegőrzés és az adatok törlése</h2>
+        <p>Mivel az órarendek, jegyzetek és beállítások a felhasználó saját eszközén tárolódnak, azok megőrzési ideje kizárólag a felhasználó döntésétől függ. Az adatok bármikor törölhetők az Alkalmazáson belül, illetve az Alkalmazás készülékről történő törlésével (Uninstall) minden helyben tárolt adat véglegesen eltávolításra kerül.</p>
+
+        <h2>6. Gyermekek adatvédelme</h2>
+        <p>Az Alkalmazás oktatási és órarend-szervezési segédeszközként nem gyűjt személyes azonosításra alkalmas adatokat sem felnőttektől, sem 16 éven aluli kiskorúaktól.</p>
+
+        <h2>7. A felhasználók jogai (GDPR) és Kapcsolat</h2>
+        <p>Amennyiben bármilyen kérdésed, észrevételed vagy adatvédelmi megkeresésed merül fel az Alkalmazással kapcsolatban, bármikor kapcsolatba léphetsz az Adatkezelővel az alábbi e-mail címen:</p>
+        <p><strong>E-mail:</strong> <a href="mailto:fancsalitamas34@gmail.com" style="color:var(--accent-indigo);">fancsalitamas34@gmail.com</a></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-links">
+      <a onclick="showPage('home')">Főoldal</a>
+      <a onclick="showPage('support')">Támogatás (Support)</a>
+      <a onclick="showPage('privacy')">Adatvédelmi Tájékoztató (Privacy Policy)</a>
+    </div>
+    <div>© 2026 Fancsali Tamás • Classy App. Minden jog fenntartva.</div>
+  </footer>
+
+  <script>
+    function showPage(pageId, updateUrl = true) {
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+      const targetSection = document.getElementById('page-' + pageId) || document.getElementById('page-home');
+      const targetBtn = document.getElementById('btn-' + pageId) || document.getElementById('btn-home');
+
+      targetSection.classList.add('active');
+      targetBtn.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (updateUrl) {
+        const newUrl = pageId === 'home' ? window.location.pathname : '?page=' + pageId;
+        window.history.pushState({ page: pageId }, '', newUrl);
+      }
+    }
+
+    function boopProf() {
+      const svg = document.getElementById('hero-prof-svg');
+      svg.classList.remove('boop-active');
+      void svg.offsetWidth; // Reflow
+      svg.classList.add('boop-active');
+    }
+
+    function checkRoute() {
+      const params = new URLSearchParams(window.location.search);
+      const pageParam = params.get('page');
+      const hashParam = window.location.hash.replace('#', '');
+
+      if (pageParam === 'support' || hashParam === 'support') {
+        showPage('support', false);
+      } else if (pageParam === 'privacy' || hashParam === 'privacy') {
+        showPage('privacy', false);
+      } else {
+        showPage('home', false);
+      }
+    }
+
+    window.addEventListener('popstate', checkRoute);
+    window.addEventListener('hashchange', checkRoute);
+    window.addEventListener('DOMContentLoaded', checkRoute);
+  </script>
+</body>
+</html>
